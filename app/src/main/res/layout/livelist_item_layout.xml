@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/livelist_item_height"
+    android:orientation="horizontal">
+    <TextView
+        android:id="@+id/nodeid"
+        android:layout_width="@dimen/nodeid_width"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:textSize="20sp"
+        android:text="hello"
+        android:visibility="gone"/>
+    <TextView
+        android:id="@+id/nickname"
+        android:layout_width="@dimen/nickname_width"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:textSize="20sp"
+        android:text="hello1"/>
+
+    <Button
+        android:id="@+id/flvplay"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:backgroundTint="@color/colorAccent"
+        android:text="flv" />
+
+    <Button
+        android:id="@+id/hlsplay"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:backgroundTint="@color/colorPrimary"
+        android:text="hls" />
+
+    <Button
+        android:id="@+id/rtmpplay"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:backgroundTint="@color/fastlane_background"
+        android:text="rtmp" />
+
+</LinearLayout>

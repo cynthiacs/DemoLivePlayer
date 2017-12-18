@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="flvbtn" type="id"></item>
+    <item name="hlsbtn" type="id"></item>
+    <item name="rtmpbtn" type="id"></item>
+</resources>

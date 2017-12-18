@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">DemoLivePlayer</string>
+    <string name="logo_text">LIVE DEMO PLAER</string>
+    <string name="title_activity_video_list">VideoListActivity</string>
+    <string name="cloudmedia_connect_success">CloudMedia connected!</string>
+    <string name="cloudmedia_connect_failed">CloudMedia connect failed!</string>
+
+    <!-- Error messages -->
+    <string name="video_error_start_push">Video pushing error</string>
+</resources>

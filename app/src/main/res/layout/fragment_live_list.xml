@@ -1,0 +1,26 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.leadcore.demoliveplayer.VideoListActivity">
+
+    <SurfaceView
+        android:id="@+id/surfaceview"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/live_surfaceview_height"
+        android:visibility="gone"/>
+
+    <ListView
+        android:id="@+id/livelist"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"></ListView>
+
+    <ProgressBar
+        android:id="@+id/startplaypb"
+        style="@android:style/Widget.ProgressBar.Large"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
+</RelativeLayout>
