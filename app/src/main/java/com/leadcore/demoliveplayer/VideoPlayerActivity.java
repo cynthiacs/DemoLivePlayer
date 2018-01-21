@@ -35,7 +35,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
         Intent intent = new Intent();
         intent.putExtra("nodeId", getIntent().getExtras().getString("nodeId"));
         setResult(STARTPLAYER_REQUEST_CODE, intent);
-        mSurfaceView = (SurfaceView)findViewById(R.id.surfaceview);
+        mSurfaceView = findViewById(R.id.surfaceview);
         mSurfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder surfaceHolder) {
@@ -70,7 +70,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
             mUrl = getIntent().getExtras().getString("url");
             mPlayer.prepareAndPlay(mUrl);
 //            Log.d(TAG, "delay 5s to play");
-            //mHandler.sendEmptyMessageDelayed(100, 5000);
+//            mHandler.sendEmptyMessageDelayed(100, 5000);
 
         }
     }
