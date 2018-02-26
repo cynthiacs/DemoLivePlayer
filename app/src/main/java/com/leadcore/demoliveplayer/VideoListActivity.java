@@ -9,6 +9,8 @@ import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.SurfaceView;
 import android.view.View;
@@ -17,11 +19,12 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.example.cloudmedia.CloudMedia;
-import com.example.cloudmedia.RemoteMediaNode;
+import com.cmteam.cloudmedia.CloudMedia;
+import com.cmteam.cloudmedia.Node;
+import com.cmteam.cloudmedia.NodesList;
+import com.cmteam.cloudmedia.PullNode;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,16 +41,18 @@ public class VideoListActivity extends AppCompatActivity {
     private ViewPager mViewPager;
     private List<View> mViews = new ArrayList<>();
     private List<String> mPagerTitle = new ArrayList<>();
-    private ProgressBar mPbar;
+//    private ProgressBar mPbar;
     private SurfaceView mSurfaceView;
     private ListView mLiveListView;
     private ListAdapter mLiveListAdapter;
-    private CloudMedia mCloudMedia;
-    private List<CloudMedia.Node> mNodes = new ArrayList<>();
+//    private CloudMedia mCloudMedia;
+    private PullNode mPullNode;
+    private List<Node> mNodes = new ArrayList<>();
     private final static String NICK_NAME = "PULLER0";
     private String mUrl;
     private String mToPlayNodeId;
     private boolean mIsWating = false;
+    private CustomDialog mWaitDialog;
     private static final int STARTPLAYER_REQUEST_CODE = 1;
 
     enum SourceType {
@@ -72,57 +77,38 @@ public class VideoListActivity extends AppCompatActivity {
         mViews.add(view1);
         mViews.add(view2);
         initLiveView(view1);
-        initCloudMedia();
+        initPullNode();
         mViewPager = findViewById(R.id.container);
         mViewPager.setAdapter(mPagerAdapter);
     }
 
     private void initLiveView(View liveView) {
-        /*mSurfaceView = (SurfaceView)liveView.findViewById(R.id.surfaceview);
-        mSurfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
-            @Override
-            public void surfaceCreated(SurfaceHolder surfaceHolder) {
-                surfaceHolder.setKeepScreenOn(true);
-                Log.d(TAG, "surfaceCreated "+mPlayer);
-                if(mPlayer != null) {
-                    mPlayer.setVideoSurface(mSurfaceView.getHolder().getSurface());
-                }
-            }
-
-            @Override
-            public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
-                Log.d(TAG, "surfaceChanged");
-                if (mPlayer != null) {
-                    mPlayer.setSurfaceChanged();
-                }
-            }
-
-            @Override
-            public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-                Log.d(TAG, "surfaceDestroyed");
-            }
-        });*/
         mLiveListView = liveView.findViewById(R.id.livelist);
         mLiveListAdapter = new ListAdapter(this);
         mLiveListView.setAdapter(mLiveListAdapter);
-        mPbar = liveView.findViewById(R.id.startplaypb);
     }
 
-    private void initCloudMedia() {
-        mCloudMedia = new CloudMedia(getApplicationContext());
-        mCloudMedia.setNodesListChangeListener(new CloudMedia.OnNodesListChange() {
+    private void initPullNode() {
+//        mCloudMedia = CloudMedia.get();
+        mPullNode = CloudMedia.declarePullNode(getApplicationContext(), NICK_NAME, "default");
+        mPullNode.setNodesListChangeListener(new PullNode.OnNodesListChange() {
             @Override
-            public void onNodesListChange(CloudMedia.NodesList nodesList) {
+            public void onNodesListChange(NodesList nodesList) {
                 Log.d(TAG, "OnNodesListChange");
                 updateNodeList(nodesList);
             }
         });
         Log.d(TAG, "to connect");
-        mCloudMedia.connect(NICK_NAME, CloudMedia.CMRole.ROLE_PULLER, new CloudMedia.RPCResultListener() {
+        mPullNode.connect("", "", "", "", "", "", new CloudMedia.RPCResultListener() {
             @Override
             public void onSuccess(String s) {
                 Log.d(TAG, "CloudMedia connect successed!");
-                setMessageListener();
+                mPullNode.setMessageListener(new CloudMedia.OnMessageListener() {
+                    @Override
+                    public void onMessage(String s, String s1, String s2) {
+                        Log.d(TAG, "onMessage:s = "+s+", s1 = "+s1+", s2 ="+s2);
+                    }
+                });
                 Toast.makeText(VideoListActivity.this,
                         getString(R.string.cloudmedia_connect_success), Toast.LENGTH_SHORT).show();
             }
@@ -136,25 +122,25 @@ public class VideoListActivity extends AppCompatActivity {
         });
     }
 
-    private void updateNodeList(CloudMedia.NodesList nodesList) {
+    private void updateNodeList(NodesList nodesList) {
         if(nodesList == null) {
             Log.d(TAG, "updateNodelist failed!");
             return;
         }
 
-        List<CloudMedia.Node> allList = nodesList.getAllOnlineList();
+        List<Node> allList = nodesList.getAllOnlineList();
         if (allList == null || allList.size() == 0) {
-            List<CloudMedia.Node> newList = nodesList.getNewOnlineList();
+            List<Node> newList = nodesList.getNewOnlineList();
             if (newList != null && newList.size() > 0) {
                 Log.d(TAG, "updateNodeList newList size:"+newList.size());
                 addInfoList(newList);
             }
-            List<CloudMedia.Node> deleList = nodesList.getNewOfflineList();
+            List<Node> deleList = nodesList.getNewOfflineList();
             if (deleList != null && deleList.size() > 0) {
                 Log.d(TAG, "updateNodeList deleList size:"+deleList.size());
                 deleteList(deleList);
             }
-            List<CloudMedia.Node> upList = nodesList.getNewUpdateList();
+            List<Node> upList = nodesList.getNewUpdateList();
             if (upList != null && upList.size() > 0) {
                 Log.d(TAG, "updateNodeList updateList size:"+upList.size());
                 updateList(upList);
@@ -167,11 +153,11 @@ public class VideoListActivity extends AppCompatActivity {
         mLiveListAdapter.notifyDataSetChanged();
     }
 
-    private void addInfoList(List<CloudMedia.Node> newList) {
+    private void addInfoList(List<Node> newList) {
         mNodes.addAll(newList);
     }
 
-    private void deleteList(List<CloudMedia.Node> deleList) {
+    private void deleteList(List<Node> deleList) {
         for(int i = 0; i < deleList.size(); i++) {
             Log.d(TAG, "deleteList:CnodeId = "+deleList.get(i).getID());
             Log.d(TAG, "deleteList:CnodeNick = "+deleList.get(i).getNick());
@@ -187,7 +173,7 @@ public class VideoListActivity extends AppCompatActivity {
         }
     }
 
-    private void updateList(List<CloudMedia.Node> upList) {
+    private void updateList(List<Node> upList) {
         for(int i = 0; i < upList.size(); i++) {
             for (int j = 0; j < mNodes.size(); j++) {
                 if (mNodes.get(j).getID().equals(upList.get(i).getID())) {
@@ -205,33 +191,40 @@ public class VideoListActivity extends AppCompatActivity {
     private void startPlay(int index, SourceType type) {
         Log.d(TAG, "startPlay:index = "+index+", type = "+type);
 
-        CloudMedia.Node cNode = mNodes.get(index);
-        final RemoteMediaNode node = mCloudMedia.declareRemoteMediaNode(cNode);
-        mToPlayNodeId = cNode.getID();
+        Node pushNode = mNodes.get(index);
+        mToPlayNodeId = pushNode.getID();
 
-        Log.d(TAG, "sendMessage: nodeId = "+cNode.getID());
-        mCloudMedia.sendMessage(cNode.getGroupID(), cNode.getID(), "puller0: start push!");
-
-        node.startPushMedia(new CloudMedia.RPCResultListener() {
+        Log.d(TAG, "sendMessage to : nodeId = "+pushNode.getID());
+        mPullNode.sendMessage(pushNode.getGroupID(), pushNode.getID(), "puller0: start push!");
+        mPullNode.setStreamExceptionListener(pushNode, new PullNode.OnStreamException() {
+            @Override
+            public void onStreamException(String s, CloudMedia.CMStreamException e) {
+                Log.d(TAG, "onStreamException: "+e.str());
+                if (mIsWating) {
+                    mIsWating = false;
+                    Toast.makeText(VideoListActivity.this,
+                            getText(R.string.video_exception_start_push), Toast.LENGTH_LONG).show();
+                    dismissWaitDialog();
+                }else {
+                    Intent intent = new Intent(VideoPlayerActivity.STREAM_EXCEPTION_MSG);
+                    VideoListActivity.this.sendBroadcast(intent);
+                }
+            }
+        });
+        mPullNode.startPushMedia(pushNode, new CloudMedia.RPCResultListener() {
             @Override
             public void onSuccess(String s) {
                 Log.d(TAG, "startPushMedia onSuccess:"+s);
-                node.setStreamExceptionListener(new RemoteMediaNode.OnStreamException() {
-                    @Override
-                    public void onStreamException(String s, RemoteMediaNode.StreamException e) {
-                        Log.d(TAG, "onStreamException: "+e.str());
-                    }
-                });
                 if (mIsWating) {
                     mIsWating = false;
-                    mPbar.setVisibility(View.GONE);
+                    dismissWaitDialog();
                     try {
                         JSONObject jsonObj = new JSONObject(s);
                         if(jsonObj.has("url")) {
                             mUrl = jsonObj.getString("url");
                             Log.d(TAG, "url = "+mUrl);
                             startPlayer();
-                            mCloudMedia.updateStreamStatus(CloudMedia.CMStreamStatus.PULLING, new CloudMedia.RPCResultListener() {
+                            mPullNode.updateStreamStatus(CloudMedia.CMStreamStatus.PULLING, new CloudMedia.RPCResultListener() {
                                 @Override
                                 public void onSuccess(String s) {
                                     Log.d(TAG, "startPushMedia updateStreamStatus onSuccess:"+s);
@@ -248,7 +241,6 @@ public class VideoListActivity extends AppCompatActivity {
                     }
                 }
 
-
             }
 
             @Override
@@ -256,15 +248,36 @@ public class VideoListActivity extends AppCompatActivity {
                 Log.d(TAG, "startPushMedia onFailure:"+s);
                 if (mIsWating) {
                     mIsWating = false;
-                    mPbar.setVisibility(View.GONE);
+                    dismissWaitDialog();
                 }
                 Toast.makeText(VideoListActivity.this,
                         getText(R.string.video_error_start_push), Toast.LENGTH_LONG).show();
             }
         });
         mIsWating = true;
-        mPbar.setVisibility(View.VISIBLE);
+        LayoutInflater inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View waitView = inflater.inflate(R.layout.waiting_dialog, null);
+        mWaitDialog = new CustomDialog.Builder(this)
+                .create(waitView, R.style.MyWaitDailog, Gravity.CENTER);
+        mWaitDialog.setDialogOnKeyDownListner(new CustomDialog.DialogOnKeyDownListner() {
+            @Override
+            public void onKeyDownListener(int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_BACK && mIsWating) {
+                    Log.d(TAG, "Dialog back key down");
+                    mIsWating = false;
+                    dismissWaitDialog();
+                    stopPushMedia(mToPlayNodeId);
+                }
+            }
+        });
+        mWaitDialog.show();
+    }
 
+    private void dismissWaitDialog() {
+        if (mWaitDialog != null) {
+            mWaitDialog.dismiss();
+            mWaitDialog = null;
+        }
     }
 
     private void startPlayer() {
@@ -272,17 +285,6 @@ public class VideoListActivity extends AppCompatActivity {
         intent.putExtra("nodeId", mToPlayNodeId);
         intent.putExtra("url", mUrl);
         startActivityForResult(intent,STARTPLAYER_REQUEST_CODE);
-    }
-
-    private void setMessageListener() {
-        if (mCloudMedia != null) {
-            mCloudMedia.setMessageListener(new CloudMedia.OnMessageListener() {
-                @Override
-                public void onMessage(String s, String s1, String s2) {
-                    Log.d(TAG, "onMessage:s = "+s+", s1 = "+s1+", s2 ="+s2);
-                }
-            });
-        }
     }
 
     @Override
@@ -298,12 +300,11 @@ public class VideoListActivity extends AppCompatActivity {
         if(mNodes != null)  {
             for (int i = 0; i < mNodes.size(); i++) {
                 if(nodeId.equals(mNodes.get(i).getID())) {
-                    mCloudMedia.declareRemoteMediaNode(mNodes.get(i)).
-                            stopPushMedia(new CloudMedia.RPCResultListener() {
+                    mPullNode.stopPushMedia(mNodes.get(i), new CloudMedia.RPCResultListener() {
                                 @Override
                                 public void onSuccess(String s) {
                                     Log.d(TAG, "stopPushMedia onSuccess s = "+s);
-                                    mCloudMedia.updateStreamStatus(CloudMedia.CMStreamStatus.PULLING_CLOSE, new CloudMedia.RPCResultListener() {
+                                    mPullNode.updateStreamStatus(CloudMedia.CMStreamStatus.PULLING_CLOSE, new CloudMedia.RPCResultListener() {
                                         @Override
                                         public void onSuccess(String s) {
                                             Log.d(TAG, "stopPushMedia updateStreamStatus onSuccess:"+s);
@@ -325,14 +326,6 @@ public class VideoListActivity extends AppCompatActivity {
                 }
             }
         }
-    }
-
-    class MediaInfo {
-        RemoteMediaNode mRemoteNode;
-        String mNodeId;
-        String mNodeNickName;
-        String mNodeStatus;
-        String mGroupId;
     }
 
     private class ViewHolder {
@@ -446,9 +439,9 @@ public class VideoListActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (mIsWating && mPbar.getVisibility() == View.VISIBLE) {
+        if (mIsWating) {
             mIsWating = false;
-            mPbar.setVisibility(View.GONE);
+            dismissWaitDialog();
             stopPushMedia(mToPlayNodeId);
         }else {
             super.onBackPressed();
@@ -459,9 +452,9 @@ public class VideoListActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy");
-        if(mCloudMedia != null) {
+        if(mPullNode != null) {
             Log.d(TAG, "disconnect");
-            mCloudMedia.disconnect();
+            mPullNode.disconnect();
         }
     }
 }

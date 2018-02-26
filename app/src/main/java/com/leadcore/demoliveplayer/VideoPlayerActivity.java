@@ -1,7 +1,10 @@
 package com.leadcore.demoliveplayer;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Message;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -12,6 +15,8 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.Toast;
+
 import com.alivc.player.AliVcMediaPlayer;
 import com.alivc.player.MediaPlayer;
 
@@ -26,7 +31,10 @@ public class VideoPlayerActivity extends AppCompatActivity {
     private SurfaceView mSurfaceView;
     private AliVcMediaPlayer mPlayer;
     private String mUrl;
+    private ExceptionReceiver mReceiver;
+
     private static final int STARTPLAYER_REQUEST_CODE = 1;
+    public static final String STREAM_EXCEPTION_MSG = "stream_exception";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +68,10 @@ public class VideoPlayerActivity extends AppCompatActivity {
             }
         });
         initPlayer();
+        mReceiver = new ExceptionReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(STREAM_EXCEPTION_MSG);
+        registerReceiver(mReceiver, filter);
     }
 
     @Override
@@ -138,6 +150,17 @@ public class VideoPlayerActivity extends AppCompatActivity {
         }
     }
 
+    private class ExceptionReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (STREAM_EXCEPTION_MSG.equals(intent.getAction())) {
+                Toast.makeText(VideoPlayerActivity.this,
+                        getText(R.string.video_exception_start_push), Toast.LENGTH_LONG).show();
+                VideoPlayerActivity.this.finish();
+            }
+        }
+    }
+
     private void destroyPlay() {
         if (mPlayer != null) {
             mPlayer.stop();
@@ -149,6 +172,9 @@ public class VideoPlayerActivity extends AppCompatActivity {
     protected void onDestroy() {
         stopPlay();
         destroyPlay();
+        if (mReceiver != null) {
+            unregisterReceiver(mReceiver);
+        }
         super.onDestroy();
     }
 }

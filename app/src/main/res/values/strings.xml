@@ -4,7 +4,9 @@
     <string name="title_activity_video_list">VideoListActivity</string>
     <string name="cloudmedia_connect_success">CloudMedia connected!</string>
     <string name="cloudmedia_connect_failed">CloudMedia connect failed!</string>
+    <string name="waitdialog_msg">Stream Pushing...</string>
 
     <!-- Error messages -->
     <string name="video_error_start_push">Video pushing error</string>
+    <string name="video_exception_start_push">Video pushing exception</string>
 </resources>
