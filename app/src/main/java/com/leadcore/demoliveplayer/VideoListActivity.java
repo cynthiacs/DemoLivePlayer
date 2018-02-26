@@ -99,7 +99,7 @@ public class VideoListActivity extends AppCompatActivity {
             }
         });
         Log.d(TAG, "to connect");
-        mPullNode.connect("", "", "", "", "", "", new CloudMedia.RPCResultListener() {
+        mPullNode.connect("", "", "g123", "gn", "v123", "vn", new CloudMedia.RPCResultListener() {
             @Override
             public void onSuccess(String s) {
                 Log.d(TAG, "CloudMedia connect successed!");
