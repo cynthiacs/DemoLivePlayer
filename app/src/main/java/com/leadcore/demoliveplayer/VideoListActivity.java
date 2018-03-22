@@ -7,12 +7,13 @@ import android.support.v4.view.PagerTabStrip;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -25,6 +26,9 @@ import com.cmteam.cloudmedia.CloudMedia;
 import com.cmteam.cloudmedia.Node;
 import com.cmteam.cloudmedia.NodesList;
 import com.cmteam.cloudmedia.PullNode;
+import com.leadcore.demoliveplayer.customviews.CustomDialog;
+import com.leadcore.demoliveplayer.customviews.RvDividerItemDecoration;
+import com.leadcore.demoliveplayer.customviews.SecondaryListAdapter;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,11 +45,11 @@ public class VideoListActivity extends AppCompatActivity {
     private ViewPager mViewPager;
     private List<View> mViews = new ArrayList<>();
     private List<String> mPagerTitle = new ArrayList<>();
-//    private ProgressBar mPbar;
-    private SurfaceView mSurfaceView;
     private ListView mLiveListView;
     private ListAdapter mLiveListAdapter;
-//    private CloudMedia mCloudMedia;
+
+    private RecyclerView mRV;
+    private RecyclerAdapter mRAdapter;
     private PullNode mPullNode;
     private List<Node> mNodes = new ArrayList<>();
     private final static String NICK_NAME = "PULLER0";
@@ -54,6 +58,7 @@ public class VideoListActivity extends AppCompatActivity {
     private boolean mIsWating = false;
     private CustomDialog mWaitDialog;
     private static final int STARTPLAYER_REQUEST_CODE = 1;
+    private List<SecondaryListAdapter.DataTree<GroupItem, Node>> mDatas = new ArrayList<>();
 
     enum SourceType {
         FLV,
@@ -65,6 +70,7 @@ public class VideoListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video_list);
+        //not used:2018-03-19
         PagerTabStrip tab = findViewById(R.id.pagertab);
         tab.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
 
@@ -74,22 +80,52 @@ public class VideoListActivity extends AppCompatActivity {
         LayoutInflater inflater = LayoutInflater.from(this);
         View view1 = inflater.inflate(R.layout.fragment_live_list,null);
         View view2 = inflater.inflate(R.layout.fragment_vod_list, null);
-        mViews.add(view1);
-        mViews.add(view2);
-        initLiveView(view1);
+//        mViews.add(view1);
+//        mViews.add(view2);
+//        initLiveView(view1);
+//        mViewPager = findViewById(R.id.container);
+//        mViewPager.setAdapter(mPagerAdapter);
+
+        //use RecyclerView:2018-03-19
+        mRV = findViewById(R.id.rv);
+        initRecyclerView();
+
         initPullNode();
-        mViewPager = findViewById(R.id.container);
-        mViewPager.setAdapter(mPagerAdapter);
     }
 
+    private void initRecyclerView() {
+        mRV.setLayoutManager(new LinearLayoutManager(this));
+        mRV.setHasFixedSize(true);
+        mRV.addItemDecoration(new RvDividerItemDecoration(this, LinearLayoutManager.VERTICAL));
+        mRAdapter = new RecyclerAdapter(this);
+        mRAdapter.setData(mDatas);
+        mRAdapter.setSubItemClickInterface(new RecyclerAdapter.SubItemClickInterface() {
+            @Override
+            public void onSubItemClick(int groupIndext, int subIndex) {
+                startPlay(groupIndext, subIndex);
+            }
+        });
+        mRV.setAdapter(mRAdapter);
+    }
     private void initLiveView(View liveView) {
         mLiveListView = liveView.findViewById(R.id.livelist);
         mLiveListAdapter = new ListAdapter(this);
         mLiveListView.setAdapter(mLiveListAdapter);
     }
 
+
+//    {
+//        for (int i = 0; i < 10; i++) {
+//
+//            datas.add(new SecondaryListAdapter.DataTree<String, String>(String.valueOf(i), new
+//                    ArrayList<String>(){{add("sub 0"); add("sub 1"); add("sub 2");}}));
+//
+//        }
+//    }
+
+
+
     private void initPullNode() {
-//        mCloudMedia = CloudMedia.get();
         mPullNode = CloudMedia.declarePullNode(getApplicationContext(), NICK_NAME, "default");
         mPullNode.setNodesListChangeListener(new PullNode.OnNodesListChange() {
             @Override
@@ -148,25 +184,75 @@ public class VideoListActivity extends AppCompatActivity {
         }else {
             Log.d(TAG, "updateNodeList allList size:"+allList.size());
             mNodes.clear();
+            mDatas.clear();
             addInfoList(allList);
         }
-        mLiveListAdapter.notifyDataSetChanged();
+//        mLiveListAdapter.notifyDataSetChanged();
+        mRAdapter.setData(mDatas);
+    }
+
+    private void addRecyclerList(List<Node> nodelist) {
+        boolean addedGrop = false;
+        for (int i = 0; i < nodelist.size(); i++) {
+            for (int j = 0; j < mDatas.size(); j++) {
+                if (nodelist.get(i).getGroupID().equals(mDatas.get(j).getGroupItem().groupID)) {
+                    addedGrop = true;
+                    List<Node> subList = mDatas.get(j).getSubItems();
+                    subList.add(nodelist.get(i));
+                    Log.d(TAG, "add subItem node nick = "
+                            +nodelist.get(i).getNick()+"(groupID:"+mDatas.get(j).getGroupItem().groupID
+                            +",groupNick:"+mDatas.get(j).getGroupItem().groupNick+")");
+                    break;
+                }
+            }
+            if (!addedGrop) {
+                GroupItem group = new GroupItem();
+                Node node = nodelist.get(i);
+                group.groupID = node.getGroupID();
+                group.groupNick = node.getGroupNick();
+                List<Node> nodeList = new ArrayList<>();
+                nodeList.add(node);
+                List<String> sub = new ArrayList<>();
+                sub.add("OK");
+                Log.d(TAG, "add groupNick = "
+                        +group.groupNick+", subItemNick:"+node.getNick());
+                mDatas.add(new SecondaryListAdapter.DataTree<GroupItem, Node>(group, nodeList));
+            }
+            addedGrop = false;
+        }
     }
 
     private void addInfoList(List<Node> newList) {
+        Log.d(TAG, "addInfoList");
         mNodes.addAll(newList);
+        addRecyclerList(newList);
+        Log.d(TAG, "mDatas.size = "+mDatas.size());
+        Log.d(TAG, "mDatas.sublist.size = "+mDatas.get(0).getSubItems().size());
     }
 
     private void deleteList(List<Node> deleList) {
         for(int i = 0; i < deleList.size(); i++) {
             Log.d(TAG, "deleteList:CnodeId = "+deleList.get(i).getID());
             Log.d(TAG, "deleteList:CnodeNick = "+deleList.get(i).getNick());
-            for (int j = 0; j < mNodes.size(); j++) {
-                if (mNodes.get(j).getID().equals(deleList.get(i).getID())) {
-                    mNodes.remove(j);
-                    Log.d(TAG, "remove:NodeId = "
-                            +deleList.get(i).getID()+", NickName = "+deleList.get(i).getNick());
-                    break;
+//            for (int j = 0; j < mNodes.size(); j++) {
+//                if (mNodes.get(j).getID().equals(deleList.get(i).getID())) {
+//                    mNodes.remove(j);
+//                    Log.d(TAG, "remove:NodeId = "
+//                            +deleList.get(i).getID()+", NickName = "+deleList.get(i).getNick());
+//                    break;
+//                }
+//            }
+            for (int j = 0; j < mDatas.size(); j++) {
+                if (deleList.get(i).getGroupID().equals(mDatas.get(j).getGroupItem().groupID)) {
+                    List<Node> nodeList = mDatas.get(j).getSubItems();
+                    for (int k = 0; k < nodeList.size(); k++) {
+                        if (deleList.get(i).getID().equals(nodeList.get(k).getID())) {
+                            nodeList.remove(k);
+                            Log.d(TAG, "remove:GropNick = "
+                                    +deleList.get(i).getGroupNick()+", NodeNick = "+deleList.get(i).getNick());
+                        }
+                    }
+
                 }
             }
 
@@ -174,24 +260,39 @@ public class VideoListActivity extends AppCompatActivity {
     }
 
     private void updateList(List<Node> upList) {
+        List<Node> groupChangedList = new ArrayList<>();
         for(int i = 0; i < upList.size(); i++) {
-            for (int j = 0; j < mNodes.size(); j++) {
-                if (mNodes.get(j).getID().equals(upList.get(i).getID())) {
-                    Log.d(TAG, "updateList:nodeId = "+mNodes.get(j).getID());
-                    Log.d(TAG, "updateList:nodeNick = "+mNodes.get(j).getNick());
-                    mNodes.remove(j);
-                    mNodes.add(j, upList.get(i));
-                    break;
+//            for (int j = 0; j < mNodes.size(); j++) {
+//                if (mNodes.get(j).getID().equals(upList.get(i).getID())) {
+//                    Log.d(TAG, "updateList:nodeId = "+mNodes.get(j).getID());
+//                    Log.d(TAG, "updateList:nodeNick = "+mNodes.get(j).getNick());
+//                    mNodes.remove(j);
+//                    mNodes.add(j, upList.get(i));
+//                    break;
+//                }
+//            }
+            for (int j = 0; j < mDatas.size(); j++) {
+                List<Node> nodeList = mDatas.get(j).getSubItems();
+                for (int k = 0; k < nodeList.size(); k++) {
+                    if (upList.get(i).getID().equals(nodeList.get(k).getID())) {
+                        nodeList.remove(k);
+                        if (upList.get(i).getGroupID().equals(nodeList.get(k).getGroupID())) {
+                            nodeList.add(k, upList.get(i));
+                        }else {
+                            groupChangedList.add(upList.get(i));
+                        }
+                    }
                 }
             }
         }
+        addRecyclerList(groupChangedList);
     }
 
 
-    private void startPlay(int index, SourceType type) {
-        Log.d(TAG, "startPlay:index = "+index+", type = "+type);
+    private void startPlay(int groupIndex, int subIndex) {
+        Log.d(TAG, "startPlay:groupIndex = "+groupIndex+", subIndex"+subIndex);
 
-        Node pushNode = mNodes.get(index);
+        Node pushNode = mDatas.get(groupIndex).getSubItems().get(subIndex);//mNodes.get(index);
         mToPlayNodeId = pushNode.getID();
 
         Log.d(TAG, "sendMessage to : nodeId = "+pushNode.getID());
@@ -377,7 +478,7 @@ public class VideoListActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     ViewHolder clickHolder = (ViewHolder) v.getTag();
                     Log.d(TAG, "list item click: "+clickHolder.index);
-                    startPlay(clickHolder.index, SourceType.RTMP);
+//                    startPlay(clickHolder.index, SourceType.RTMP);
                 }
             });
             holder.index = i;

@@ -1,4 +1,4 @@
-package com.leadcore.demoliveplayer;
+package com.leadcore.demoliveplayer.customviews;
 
 import android.app.Dialog;
 import android.content.Context;

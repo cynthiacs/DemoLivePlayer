@@ -1,59 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="@dimen/login_margin"
-    android:paddingRight="@dimen/login_margin"
-    android:orientation="vertical"
-    tools:context="com.leadcore.demoliveplayer.MainActivity">
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/logo_text"
-        android:textSize="16pt"
-        android:gravity="center"
-        android:layout_marginTop="@dimen/login_top_margin"
-        android:background="@android:color/darker_gray"/>
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/login_edit_height"
-        android:layout_marginTop="@dimen/login_margin">
-        <TextView
-            android:id="@+id/usertx"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="user"
-            android:textSize="12pt"/>
-        <EditText
-            android:id="@+id/useredit"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_toRightOf="@id/usertx"/>
-    </RelativeLayout>
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/login_edit_height"
-        android:layout_marginTop="@dimen/login_margin">
-        <TextView
-            android:id="@+id/passtx"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="pwd"
-            android:textSize="12pt"/>
-        <EditText
-            android:id="@+id/passedit"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_toRightOf="@id/passtx"/>
-    </RelativeLayout>
-    <Button
-        android:id="@+id/loginbtn"
+    android:background="@drawable/bg1"
+    android:fitsSystemWindows="true"
+    >
+    <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="@dimen/login_top_margin"
-        android:text="LOGIN"
+        android:src="@drawable/logo"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/login_image_margin_top"/>
+
+    <Button
+        android:id="@+id/startbtn"
+        android:layout_width="@dimen/login_btn_width"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/login_margin_bottom"
+        android:text="@string/startbtn_text"
+        android:textSize="20sp"
+        android:textColor="@color/colorstartbtn"
+        android:background="@drawable/startbtnbg"
         />
-</LinearLayout>
+</RelativeLayout>

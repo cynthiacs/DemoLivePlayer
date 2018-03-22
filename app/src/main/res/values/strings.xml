@@ -1,6 +1,11 @@
 <resources>
     <string name="app_name">DemoLivePlayer</string>
     <string name="logo_text">LIVE DEMO PLAER</string>
+    <string name="startbtn_text">START</string>
+    <string name="user_hint">username</string>
+    <string name="psw_hint">password</string>
+    <string name="signin_btn">sign in</string>
+    <string name="signup_btn">sign up</string>
     <string name="title_activity_video_list">VideoListActivity</string>
     <string name="cloudmedia_connect_success">CloudMedia connected!</string>
     <string name="cloudmedia_connect_failed">CloudMedia connect failed!</string>

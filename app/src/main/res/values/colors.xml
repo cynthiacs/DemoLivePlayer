@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="colorlistbar">#409eff</color>
+    <color name="colorstartbtn">#646464</color>
+    <color name="colorsignupbtn">#3f9eff</color>
+    <color name="colorlistback">#f2f2f2</color>
+    <color name="colorlisttitle">#a7a7a7</color>
+
     <color name="colorPrimary">#6477de</color>
     <color name="colorPrimaryDark">#303f9f</color>
     <color name="colorAccent">#f96b9b</color>
