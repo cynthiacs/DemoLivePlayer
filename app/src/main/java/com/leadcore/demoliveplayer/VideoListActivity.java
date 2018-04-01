@@ -50,7 +50,9 @@ public class VideoListActivity extends AppCompatActivity {
 
     private RecyclerView mRV;
     private RecyclerAdapter mRAdapter;
+    private CloudMedia mCloudMedia;
     private PullNode mPullNode;
+    private String mAccount;
     private List<Node> mNodes = new ArrayList<>();
     private final static String NICK_NAME = "PULLER0";
     private String mUrl;
@@ -113,32 +115,23 @@ public class VideoListActivity extends AppCompatActivity {
         mLiveListView.setAdapter(mLiveListAdapter);
     }
 
-
-//    {
-//        for (int i = 0; i < 10; i++) {
-//
-//            datas.add(new SecondaryListAdapter.DataTree<String, String>(String.valueOf(i), new
-//                    ArrayList<String>(){{add("sub 0"); add("sub 1"); add("sub 2");}}));
-//
-//        }
-//    }
-
-
-
     private void initPullNode() {
-        mPullNode = CloudMedia.declarePullNode(getApplicationContext(), NICK_NAME, "default");
+        mAccount = getIntent().getStringExtra("account");
+        mCloudMedia = CloudMedia.get();
+
+        mPullNode = mCloudMedia.declarePullNode(getApplicationContext(), NICK_NAME, "default");
         mPullNode.setNodesListChangeListener(new PullNode.OnNodesListChange() {
             @Override
             public void onNodesListChange(NodesList nodesList) {
-                Log.d(TAG, "OnNodesListChange");
                 updateNodeList(nodesList);
             }
         });
         Log.d(TAG, "to connect");
-        mPullNode.connect("", "", "g123", "gn", "v123", "vn", new CloudMedia.RPCResultListener() {
+        mPullNode.connect(mCloudMedia.getUser(mAccount), new CloudMedia.RPCResultListener() {
             @Override
             public void onSuccess(String s) {
                 Log.d(TAG, "CloudMedia connect successed!");
+                Log.d(TAG, "OnNodesListChange");
                 mPullNode.setMessageListener(new CloudMedia.OnMessageListener() {
                     @Override
                     public void onMessage(String s, String s1, String s2) {
@@ -556,6 +549,9 @@ public class VideoListActivity extends AppCompatActivity {
         if(mPullNode != null) {
             Log.d(TAG, "disconnect");
             mPullNode.disconnect();
+        }
+        if (mCloudMedia != null) {
+            mCloudMedia.logout(mAccount);
         }
     }
 }
