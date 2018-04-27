@@ -54,7 +54,6 @@ public class RecyclerAdapter extends SecondaryListAdapter<RecyclerAdapter.GroupI
     public RecyclerView.ViewHolder subItemViewHolder(ViewGroup parent) {
 
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.sub_item, parent, false);
-
         return new SubItemViewHolder(v);
     }
 
@@ -67,10 +66,10 @@ public class RecyclerAdapter extends SecondaryListAdapter<RecyclerAdapter.GroupI
 
     @Override
     public void onSubItemBindViewHolder(RecyclerView.ViewHolder holder, int groupItemIndex, int subItemIndex) {
-        Log.d(TAG, "onSubItemBindViewHolder");
+
         ((SubItemViewHolder) holder).tvSub.setText(dts.get(groupItemIndex).getSubItems().get(subItemIndex).getNick());
 
-        if (dts.get(groupItemIndex).getSubItems().get(subItemIndex).getStreamStatus().equals(CloudMedia.CMStreamStatus.PUSHING)) {
+        if (dts.get(groupItemIndex).getSubItems().get(subItemIndex).getStreamStatus().equals(CloudMedia.CMStreamStatus.PUSHING.str())) {
             ((SubItemViewHolder) holder).ivItemRight.setVisibility(View.VISIBLE);
         }else {
             ((SubItemViewHolder) holder).ivItemRight.setVisibility(View.GONE);

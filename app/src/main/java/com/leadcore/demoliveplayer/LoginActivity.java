@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Animatable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -15,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.cmteam.cloudmedia.CloudMedia;
@@ -34,7 +36,7 @@ public class LoginActivity extends Activity {
     private final static int MODE_SIGNUP = 1;
     private int mMode = MODE_SIGNIN;
     private CloudMedia mCloudMedia;
-    private final static String IP = "139.224.128.15";
+    private final static String IP = "139.224.128.15";//"192.168.199.68";//
     private final static String PORT = "8085";
     private final static int MSG_SIGNIN_RESULT = 0;
     private final static int MSG_SIGNUP_RESULT = 1;
@@ -46,7 +48,9 @@ public class LoginActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         userEt = findViewById(R.id.useredit);
+        userEt.setText("A159308");
         pswEt = findViewById(R.id.passedit);
+        pswEt.setText("123456");
         signinbtn = findViewById(R.id.signinbtn);
         signinbtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -93,7 +97,7 @@ public class LoginActivity extends Activity {
                         intent.putExtra("account", mAccount);
                         startActivity(intent);
                     }else {
-                        Toast.makeText(LoginActivity.this, R.string.signin_failed, Toast.LENGTH_SHORT);
+                        Toast.makeText(LoginActivity.this, R.string.signin_failed, Toast.LENGTH_SHORT).show();
                     }
                     break;
                 case MSG_SIGNUP_RESULT:
@@ -107,7 +111,7 @@ public class LoginActivity extends Activity {
             @Override
             public void run() {
                 boolean loginsuccess = mCloudMedia.login(IP, PORT, mAccount, pswEt.getText().toString());
-                Log.d(TAG, "get loginresult");
+                Log.d(TAG, "get loginresult:"+loginsuccess);
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_SIGNIN_RESULT, loginsuccess));
             }
         }.start();
@@ -124,6 +128,8 @@ public class LoginActivity extends Activity {
         View waitView = inflater.inflate(R.layout.waiting_dialog, null);
         mWaitDialog = new CustomDialog.Builder(this)
                 .create(waitView, R.style.MyWaitDailog, Gravity.CENTER);
+        ImageView images = waitView.findViewById(R.id.images);
+        ((Animatable)images.getDrawable()).start();
         mWaitDialog.setDialogOnKeyDownListner(new CustomDialog.DialogOnKeyDownListner() {
             @Override
             public void onKeyDownListener(int keyCode, KeyEvent event) {

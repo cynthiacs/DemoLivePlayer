@@ -2,6 +2,7 @@ package com.leadcore.demoliveplayer;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Animatable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.PagerTabStrip;
 import android.support.v7.app.AppCompatActivity;
@@ -19,6 +20,7 @@ import android.view.ViewGroup;
 
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -268,8 +270,11 @@ public class VideoListActivity extends AppCompatActivity {
                 List<Node> nodeList = mDatas.get(j).getSubItems();
                 for (int k = 0; k < nodeList.size(); k++) {
                     if (upList.get(i).getID().equals(nodeList.get(k).getID())) {
+                        String groupID = nodeList.get(k).getGroupID();
+                        Log.d(TAG, "updateList remove: id = "+nodeList.get(k).getID());
                         nodeList.remove(k);
-                        if (upList.get(i).getGroupID().equals(nodeList.get(k).getGroupID())) {
+                        if (upList.get(i).getGroupID().equals(groupID)) {
+                            Log.d(TAG, "updateList same groupID  : id = "+groupID);
                             nodeList.add(k, upList.get(i));
                         }else {
                             groupChangedList.add(upList.get(i));
@@ -278,12 +283,14 @@ public class VideoListActivity extends AppCompatActivity {
                 }
             }
         }
-        addRecyclerList(groupChangedList);
+        if (groupChangedList.size() > 0) {
+            addRecyclerList(groupChangedList);
+        }
     }
 
 
     private void startPlay(int groupIndex, int subIndex) {
-        Log.d(TAG, "startPlay:groupIndex = "+groupIndex+", subIndex"+subIndex);
+        Log.d(TAG, "startPlay:groupIndex = "+groupIndex+", subIndex = "+subIndex);
 
         Node pushNode = mDatas.get(groupIndex).getSubItems().get(subIndex);//mNodes.get(index);
         mToPlayNodeId = pushNode.getID();
@@ -351,6 +358,8 @@ public class VideoListActivity extends AppCompatActivity {
         mIsWating = true;
         LayoutInflater inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View waitView = inflater.inflate(R.layout.waiting_dialog, null);
+        ImageView images = waitView.findViewById(R.id.images);
+        ((Animatable)images.getDrawable()).start();
         mWaitDialog = new CustomDialog.Builder(this)
                 .create(waitView, R.style.MyWaitDailog, Gravity.CENTER);
         mWaitDialog.setDialogOnKeyDownListner(new CustomDialog.DialogOnKeyDownListner() {
@@ -551,7 +560,12 @@ public class VideoListActivity extends AppCompatActivity {
             mPullNode.disconnect();
         }
         if (mCloudMedia != null) {
-            mCloudMedia.logout(mAccount);
+            new Thread() {
+                @Override
+                public void run() {
+                    mCloudMedia.logout(mAccount);
+                }
+            }.start();
         }
     }
 }
