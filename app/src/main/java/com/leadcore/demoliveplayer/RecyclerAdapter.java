@@ -86,8 +86,8 @@ public class RecyclerAdapter extends SecondaryListAdapter<RecyclerAdapter.GroupI
             holder.ivGroupright.setImageResource(R.drawable.icon_up);
         }
 
-        Toast.makeText(context, "group item " + String.valueOf(groupItemIndex) + " is expand " +
-                String.valueOf(isExpand), Toast.LENGTH_SHORT).show();
+//        Toast.makeText(context, "group item " + String.valueOf(groupItemIndex) + " is expand " +
+//                String.valueOf(isExpand), Toast.LENGTH_SHORT).show();
 
     }
 
@@ -95,8 +95,8 @@ public class RecyclerAdapter extends SecondaryListAdapter<RecyclerAdapter.GroupI
     public void onSubItemClick(SubItemViewHolder holder, int groupItemIndex, int subItemIndex) {
         Log.d(TAG, "onSubItemClick");
         mSubItemClickInterface.onSubItemClick(groupItemIndex, subItemIndex);
-        Toast.makeText(context, "sub item " + String.valueOf(subItemIndex) + " in group item " +
-                String.valueOf(groupItemIndex), Toast.LENGTH_SHORT).show();
+//        Toast.makeText(context, "sub item " + String.valueOf(subItemIndex) + " in group item " +
+//                String.valueOf(groupItemIndex), Toast.LENGTH_SHORT).show();
 
     }
 

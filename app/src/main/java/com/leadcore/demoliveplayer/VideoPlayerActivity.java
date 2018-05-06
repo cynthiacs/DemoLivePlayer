@@ -6,19 +6,22 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Message;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.MotionEvent;
+import android.view.Gravity;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.widget.Toast;
+import android.widget.Button;
+import android.widget.TextView;
 
 import com.alivc.player.AliVcMediaPlayer;
 import com.alivc.player.MediaPlayer;
+import com.leadcore.demoliveplayer.customviews.CustomDialog;
 
 import java.util.Map;
 
@@ -32,6 +35,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
     private AliVcMediaPlayer mPlayer;
     private String mUrl;
     private ExceptionReceiver mReceiver;
+    CustomDialog mWarningDialog;
 
     private static final int STARTPLAYER_REQUEST_CODE = 1;
     public static final String STREAM_EXCEPTION_MSG = "stream_exception";
@@ -83,7 +87,6 @@ public class VideoPlayerActivity extends AppCompatActivity {
             mPlayer.prepareAndPlay(mUrl);
 //            Log.d(TAG, "delay 5s to play");
 //            mHandler.sendEmptyMessageDelayed(100, 5000);
-
         }
     }
 
@@ -121,12 +124,17 @@ public class VideoPlayerActivity extends AppCompatActivity {
                     String str = logInfos.get(in);
                     Log.d(TAG, in+":"+str+"|");
                 }
+                showWarningDialog(R.string.msg_warning_neterror);
             }
         });
         mPlayer.setCompletedListener(new MediaPlayer.MediaPlayerCompletedListener() {
             @Override
             public void onCompleted() {
                 Log.d(TAG, "AliVcMediaPlayer onCompleted!");
+//                Toast.makeText(VideoPlayerActivity.this,
+//                        getText(R.string.video_complete_push), Toast.LENGTH_LONG).show();
+//                VideoPlayerActivity.this.finish();
+                showWarningDialog(R.string.msg_warning_puserror);
             }
         });
         mPlayer.setStoppedListener(new MediaPlayer.MediaPlayerStoppedListener() {
@@ -144,6 +152,34 @@ public class VideoPlayerActivity extends AppCompatActivity {
         mPlayer.enableNativeLog();
     }
 
+    private void showWarningDialog(int resStringId) {
+        LayoutInflater inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View warningView = inflater.inflate(R.layout.warning_layout, null);
+        TextView msgTv = warningView.findViewById(R.id.warning_msg);
+        msgTv.setText(resStringId);
+        Button btn = warningView.findViewById(R.id.warning_btn);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mWarningDialog.dismiss();
+                VideoPlayerActivity.this.finish();
+            }
+        });
+        mWarningDialog = new CustomDialog.Builder(this)
+                .create(warningView, R.style.MyWaringDailog, Gravity.CENTER);
+        mWarningDialog.setDialogOnKeyDownListner(new CustomDialog.DialogOnKeyDownListner() {
+            @Override
+            public void onKeyDownListener(int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_BACK) {
+                    Log.d(TAG, "Dialog back key down");
+                    mWarningDialog.dismiss();
+                    VideoPlayerActivity.this.finish();
+                }
+            }
+        });
+        mWarningDialog.show();
+    }
+
     private void stopPlay() {
         if (mPlayer != null) {
             mPlayer.stop();
@@ -154,9 +190,10 @@ public class VideoPlayerActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (STREAM_EXCEPTION_MSG.equals(intent.getAction())) {
-                Toast.makeText(VideoPlayerActivity.this,
-                        getText(R.string.video_exception_start_push), Toast.LENGTH_LONG).show();
-                VideoPlayerActivity.this.finish();
+//                Toast.makeText(VideoPlayerActivity.this,
+//                        getText(R.string.video_exception_start_push), Toast.LENGTH_LONG).show();
+                showWarningDialog(R.string.msg_warning_puserror);
+//                VideoPlayerActivity.this.finish();
             }
         }
     }

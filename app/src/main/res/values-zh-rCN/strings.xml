@@ -7,5 +7,11 @@
     <string name="psw_hint">密码</string>
     <string name="user_warning">用户名不能为空</string>
     <string name="psw_warning">密码不能为空</string>
-    <string name="signin_failed">登录失败</string>
+    <string name="signin_failed">登录失败：用户名或者密码不正确</string>
+    <string name="ok_btn">知道了</string>
+
+    <string name="msg_warning_puserror">推流端异常</string>
+    <string name="msg_warning_neterror">网络异常</string>
+    <string name="msg_warning_timeout">超时</string>
+    <string name="msg_warning_unknown">未知异常</string>
 </resources>

@@ -17,4 +17,5 @@
     <!-- Error messages -->
     <string name="video_error_start_push">Video pushing error</string>
     <string name="video_exception_start_push">Video pushing exception</string>
+    <string name="video_complete_push">Stream Push completed!</string>
 </resources>
