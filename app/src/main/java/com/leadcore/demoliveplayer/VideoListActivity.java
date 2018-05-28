@@ -120,6 +120,9 @@ public class VideoListActivity extends AppCompatActivity {
     private void initPullNode() {
         mAccount = getIntent().getStringExtra("account");
         mCloudMedia = CloudMedia.get();
+        CloudMedia.CMUser user = mCloudMedia.getUser(mAccount);
+
+//        String titleStr = mAccount + "(" +(mCloudMedia.getUser(mAccount))
 
         mPullNode = mCloudMedia.declarePullNode(getApplicationContext(), NICK_NAME, "default");
         mPullNode.setNodesListChangeListener(new PullNode.OnNodesListChange() {
