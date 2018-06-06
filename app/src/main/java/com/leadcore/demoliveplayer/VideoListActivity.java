@@ -120,11 +120,9 @@ public class VideoListActivity extends AppCompatActivity {
     private void initPullNode() {
         mAccount = getIntent().getStringExtra("account");
         mCloudMedia = CloudMedia.get();
-        CloudMedia.CMUser user = mCloudMedia.getUser(mAccount);
-
-//        String titleStr = mAccount + "(" +(mCloudMedia.getUser(mAccount))
 
         mPullNode = mCloudMedia.declarePullNode(getApplicationContext(), NICK_NAME, "default");
+
         mPullNode.setNodesListChangeListener(new PullNode.OnNodesListChange() {
             @Override
             public void onNodesListChange(NodesList nodesList) {
@@ -137,6 +135,9 @@ public class VideoListActivity extends AppCompatActivity {
             public void onSuccess(String s) {
                 Log.d(TAG, "CloudMedia connect successed!");
                 Log.d(TAG, "OnNodesListChange");
+                String titleStr = mAccount + "(" + mPullNode.getMyNode().getGroupNick() + ")";
+                TextView titletv = findViewById(R.id.titletx);
+                titletv.setText(titleStr);
                 mPullNode.setMessageListener(new CloudMedia.OnMessageListener() {
                     @Override
                     public void onMessage(String s, String s1, String s2) {
