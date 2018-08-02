@@ -67,7 +67,7 @@ public class RecyclerAdapter extends SecondaryListAdapter<RecyclerAdapter.GroupI
     @Override
     public void onSubItemBindViewHolder(RecyclerView.ViewHolder holder, int groupItemIndex, int subItemIndex) {
 
-        ((SubItemViewHolder) holder).tvSub.setText(dts.get(groupItemIndex).getSubItems().get(subItemIndex).getNick());
+        ((SubItemViewHolder) holder).tvSub.setText(dts.get(groupItemIndex).getSubItems().get(subItemIndex).getDeviceName());
 
         if (dts.get(groupItemIndex).getSubItems().get(subItemIndex).getStreamStatus().equals(CloudMedia.CMStreamStatus.PUSHING.str())) {
             ((SubItemViewHolder) holder).ivItemRight.setVisibility(View.VISIBLE);

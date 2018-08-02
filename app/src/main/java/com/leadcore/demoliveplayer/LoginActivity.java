@@ -37,8 +37,9 @@ public class LoginActivity extends Activity {
     private final static int MODE_SIGNUP = 1;
     private int mMode = MODE_SIGNIN;
     private CloudMedia mCloudMedia;
-    private final static String IP = "139.224.128.15";//"192.168.199.68";//
+    private final static String IP = "47.100.125.222";
     private final static String PORT = "8085";
+    private final static String mDomainName = "www.yangxudong.com";
     private final static int MSG_SIGNIN_RESULT = 0;
     private final static int MSG_SIGNUP_RESULT = 1;
     private String mAccount;
@@ -111,7 +112,7 @@ public class LoginActivity extends Activity {
         new Thread() {
             @Override
             public void run() {
-                boolean loginsuccess = mCloudMedia.login(IP, PORT, mAccount, pswEt.getText().toString());
+                boolean loginsuccess = mCloudMedia.login(mDomainName, mAccount, pswEt.getText().toString());
                 Log.d(TAG, "get loginresult:"+loginsuccess);
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_SIGNIN_RESULT, loginsuccess));
             }

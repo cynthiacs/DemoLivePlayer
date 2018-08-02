@@ -121,7 +121,7 @@ public class VideoListActivity extends AppCompatActivity {
         mAccount = getIntent().getStringExtra("account");
         mCloudMedia = CloudMedia.get();
 
-        mPullNode = mCloudMedia.declarePullNode(getApplicationContext(), NICK_NAME, "default");
+        mPullNode = mCloudMedia.declarePullNode(getApplicationContext(), mAccount, mAccount);
 
         mPullNode.setNodesListChangeListener(new PullNode.OnNodesListChange() {
             @Override
@@ -199,7 +199,7 @@ public class VideoListActivity extends AppCompatActivity {
                     List<Node> subList = mDatas.get(j).getSubItems();
                     subList.add(nodelist.get(i));
                     Log.d(TAG, "add subItem node nick = "
-                            +nodelist.get(i).getNick()+"(groupID:"+mDatas.get(j).getGroupItem().groupID
+                            +nodelist.get(i).getDeviceName()+"(groupID:"+mDatas.get(j).getGroupItem().groupID
                             +",groupNick:"+mDatas.get(j).getGroupItem().groupNick+")");
                     break;
                 }
@@ -214,7 +214,7 @@ public class VideoListActivity extends AppCompatActivity {
                 List<String> sub = new ArrayList<>();
                 sub.add("OK");
                 Log.d(TAG, "add groupNick = "
-                        +group.groupNick+", subItemNick:"+node.getNick());
+                        +group.groupNick+", subItemNick:"+node.getDeviceName());
                 mDatas.add(new SecondaryListAdapter.DataTree<GroupItem, Node>(group, nodeList));
             }
             addedGrop = false;
@@ -232,12 +232,12 @@ public class VideoListActivity extends AppCompatActivity {
     private void deleteList(List<Node> deleList) {
         for(int i = 0; i < deleList.size(); i++) {
             Log.d(TAG, "deleteList:CnodeId = "+deleList.get(i).getID());
-            Log.d(TAG, "deleteList:CnodeNick = "+deleList.get(i).getNick());
+            Log.d(TAG, "deleteList:CnodeNick = "+deleList.get(i).getDeviceName());
 //            for (int j = 0; j < mNodes.size(); j++) {
 //                if (mNodes.get(j).getID().equals(deleList.get(i).getID())) {
 //                    mNodes.remove(j);
 //                    Log.d(TAG, "remove:NodeId = "
-//                            +deleList.get(i).getID()+", NickName = "+deleList.get(i).getNick());
+//                            +deleList.get(i).getID()+", NickName = "+deleList.get(i).getDeviceName());
 //                    break;
 //                }
 //            }
@@ -248,7 +248,7 @@ public class VideoListActivity extends AppCompatActivity {
                         if (deleList.get(i).getID().equals(nodeList.get(k).getID())) {
                             nodeList.remove(k);
                             Log.d(TAG, "remove:GropNick = "
-                                    +deleList.get(i).getGroupNick()+", NodeNick = "+deleList.get(i).getNick());
+                                    +deleList.get(i).getGroupNick()+", NodeNick = "+deleList.get(i).getDeviceName());
                         }
                     }
 
@@ -264,7 +264,7 @@ public class VideoListActivity extends AppCompatActivity {
 //            for (int j = 0; j < mNodes.size(); j++) {
 //                if (mNodes.get(j).getID().equals(upList.get(i).getID())) {
 //                    Log.d(TAG, "updateList:nodeId = "+mNodes.get(j).getID());
-//                    Log.d(TAG, "updateList:nodeNick = "+mNodes.get(j).getNick());
+//                    Log.d(TAG, "updateList:nodeNick = "+mNodes.get(j).getDeviceName());
 //                    mNodes.remove(j);
 //                    mNodes.add(j, upList.get(i));
 //                    break;
@@ -489,7 +489,7 @@ public class VideoListActivity extends AppCompatActivity {
             });
             holder.index = i;
             holder.nodeIdTv.setText(mNodes.get(i).getID());
-            holder.nickNameTv.setText(mNodes.get(i).getNick());
+            holder.nickNameTv.setText(mNodes.get(i).getDeviceName());
 //            holder.flvBtn.setTag(R.id.flvbtn, i);
 //            holder.flvBtn.setOnClickListener(this);
 //            holder.hlsBtn.setTag(R.id.hlsbtn, i);
