@@ -94,9 +94,11 @@ public class LoginActivity extends Activity {
             switch (msg.what) {
                 case MSG_SIGNIN_RESULT:
                     dismissWaitDialog();
-                    if ((boolean)msg.obj) {
+                    String nodeid = (String)msg.obj;
+                    if (nodeid != null) {
                         Intent intent = new Intent(LoginActivity.this, VideoListActivity.class);
                         intent.putExtra("account", mAccount);
+                        intent.putExtra("nodeid", nodeid);
                         startActivity(intent);
                     }else {
                         Toast.makeText(LoginActivity.this, R.string.signin_failed, Toast.LENGTH_SHORT).show();
@@ -112,9 +114,9 @@ public class LoginActivity extends Activity {
         new Thread() {
             @Override
             public void run() {
-                boolean loginsuccess = mCloudMedia.login(mDomainName, mAccount, pswEt.getText().toString());
-                Log.d(TAG, "get loginresult:"+loginsuccess);
-                mHandler.sendMessage(mHandler.obtainMessage(MSG_SIGNIN_RESULT, loginsuccess));
+                String loginNodeId = mCloudMedia.login(mDomainName, mAccount, pswEt.getText().toString());
+                Log.d(TAG, "get loginresult:"+loginNodeId);
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_SIGNIN_RESULT, loginNodeId));
             }
         }.start();
     }

@@ -55,6 +55,7 @@ public class VideoListActivity extends AppCompatActivity {
     private CloudMedia mCloudMedia;
     private PullNode mPullNode;
     private String mAccount;
+    private String mloginNodeId;
     private List<Node> mNodes = new ArrayList<>();
     private final static String NICK_NAME = "PULLER0";
     private String mUrl;
@@ -119,6 +120,7 @@ public class VideoListActivity extends AppCompatActivity {
 
     private void initPullNode() {
         mAccount = getIntent().getStringExtra("account");
+        mloginNodeId = getIntent().getStringExtra("nodeid");
         mCloudMedia = CloudMedia.get();
 
         mPullNode = mCloudMedia.declarePullNode(getApplicationContext(), mAccount, mAccount);
@@ -130,7 +132,7 @@ public class VideoListActivity extends AppCompatActivity {
             }
         });
         Log.d(TAG, "to connect");
-        mPullNode.connect(mCloudMedia.getUser(mAccount), new CloudMedia.RPCResultListener() {
+        mPullNode.connect(mCloudMedia.getUser(mloginNodeId), new CloudMedia.RPCResultListener() {
             @Override
             public void onSuccess(String s) {
                 Log.d(TAG, "CloudMedia connect successed!");
@@ -567,7 +569,7 @@ public class VideoListActivity extends AppCompatActivity {
             new Thread() {
                 @Override
                 public void run() {
-                    mCloudMedia.logout(mAccount);
+                    mCloudMedia.logout(mAccount, mloginNodeId);
                 }
             }.start();
         }
